@@ -45,8 +45,9 @@ namespace InvestCloudServer
             // Step 6: Submit the MD5 hash for validation
             string validationResult = await Services.Services.ValidateResult(md5Hash);
 
-            if ((validationResult != "Alas it didn't work") // Check if validation succeeded
-            // && (stopwatch.Elapsed < TimeSpan.FromSeconds(30)) // Check if the elapsed time is less than 30 seconds
+            if (
+                (validationResult != "Alas it didn't work") // Check if validation succeeded
+                && (stopwatch.Elapsed < TimeSpan.FromSeconds(30)) // Check if the elapsed time is less than 30 seconds
             )
             {
                 Console.WriteLine("Passphrase: " + md5Hash); // Success! Print the passphrase
