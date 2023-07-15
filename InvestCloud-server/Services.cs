@@ -31,7 +31,7 @@ namespace InvestCloudServer.Services
 
             for (int i = 0; i < size; i++)
             {
-                int row = i; // Capture the row variable for the lambda expression
+                int row = i; // Capture the row variable for the lambda expression, otherwise it uses 5
                 tasks[i] = Task.Run(async () =>
                 {
                     string url =
