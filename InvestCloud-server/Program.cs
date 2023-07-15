@@ -36,7 +36,7 @@ namespace InvestCloudServer
             string resultString = Utils.Utils.MatrixToString(resultMatrix);
 
             stopwatch.Stop();
-            Console.WriteLine("Time Elapsed: " + stopwatch.Elapsed);
+            Console.WriteLine("Time Ended: " + stopwatch.Elapsed);
 
             // Step 5: Calculate the MD5 hash of the result string
             string md5Hash = Utils.Utils.CalculateMD5Hash(resultString);
