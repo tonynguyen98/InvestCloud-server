@@ -10,6 +10,7 @@ namespace InvestCloudServer.Utils
             int size = matrix.GetLength(0);
             StringBuilder sb = new();
 
+            // Iterate through each element in the matrix and append it to the string builder
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -28,18 +29,21 @@ namespace InvestCloudServer.Utils
             return Convert.ToHexString(hashBytes);
         }
 
-        // Strassen's Matrix Multiplication algorithm = O(n^log2(7))
-        public static int[,] MultiplyMatrices(int[,] A, int[,] B, int nativeThreshold = 128)
+        // Performs matrix multiplication using Strassen's algorithm
+        // traditionalThreshold determines the size at which the algorithm switches to traditional multiplication
+        public static int[,] MultiplyMatrices(int[,] A, int[,] B, int traditionalThreshold = 128)
         {
             int n = A.GetLength(0);
             int[,] result = new int[n, n];
 
-            if (n <= nativeThreshold)
+            if (n <= traditionalThreshold)
             {
-                result = NativeMultiplyMatrices(A, B);
+                // If the matrix size is small enough, use traditional matrix multiplication
+                result = TraditionalMultiplyMatrices(A, B);
             }
             else
             {
+                // Divide matrices into submatrices
                 int halfSize = n / 2;
 
                 int[,] A11 = new int[halfSize, halfSize];
@@ -52,7 +56,6 @@ namespace InvestCloudServer.Utils
                 int[,] B21 = new int[halfSize, halfSize];
                 int[,] B22 = new int[halfSize, halfSize];
 
-                // Divide matrices into submatrices
                 DivideMatrix(A, A11, 0, 0);
                 DivideMatrix(A, A12, 0, halfSize);
                 DivideMatrix(A, A21, halfSize, 0);
@@ -139,12 +142,12 @@ namespace InvestCloudServer.Utils
             return result;
         }
 
-        // Native Matrix Multiplication algorithm = O(n^3))
-        public static int[,] NativeMultiplyMatrices(int[,] A, int[,] B)
+        public static int[,] TraditionalMultiplyMatrices(int[,] A, int[,] B)
         {
             int size = A.GetLength(0);
             int[,] result = new int[size, size];
 
+            // Use parallelism to speed up the computation
             Parallel.For(
                 0,
                 size,

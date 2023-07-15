@@ -11,6 +11,7 @@ namespace InvestCloudServer.Services
         public static async Task<ResultOfInt32?> InitializeDatasets(int size)
         {
             string url = $"https://recruitment-test.investcloud.com/api/numbers/init/{size}";
+
             HttpResponseMessage response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
@@ -18,6 +19,7 @@ namespace InvestCloudServer.Services
             ResultOfInt32? obj = await JsonSerializer.DeserializeAsync<ResultOfInt32>(
                 responseStream
             );
+
             if (!obj?.Success ?? true)
                 throw new Exception($"Initializing {size} matrix failed: {obj?.Cause}");
 
@@ -29,13 +31,15 @@ namespace InvestCloudServer.Services
             int[,] matrix = new int[size, size];
             Task[] tasks = new Task[size];
 
+            // Retrieve each row of the dataset in parallel
             for (int i = 0; i < size; i++)
             {
-                int row = i; // Capture the row variable for the lambda expression, otherwise it uses 5
+                int row = i; // Capture the row variable for the lambda expression, otherwise it uses int size
                 tasks[i] = Task.Run(async () =>
                 {
                     string url =
                         $"https://recruitment-test.investcloud.com/api/numbers/{dataset}/row/{row}";
+
                     HttpResponseMessage response = await client.GetAsync(url);
                     response.EnsureSuccessStatusCode();
                     Stream responseStream = await response.Content.ReadAsStreamAsync();
@@ -50,6 +54,7 @@ namespace InvestCloudServer.Services
                             $"Getting Matrix {dataset} failed, return size does not match"
                         );
 
+                    // Fill in the retrieved data into the matrix
                     for (int j = 0; j < size; j++)
                     {
                         matrix[row, j] = obj!.Value[j];
@@ -57,6 +62,7 @@ namespace InvestCloudServer.Services
                 });
             }
 
+            // Wait for all the row retrieval tasks to complete
             await Task.WhenAll(tasks);
             return matrix;
         }
@@ -64,7 +70,11 @@ namespace InvestCloudServer.Services
         public static async Task<string> ValidateResult(string md5Hash)
         {
             string url = "https://recruitment-test.investcloud.com/api/numbers/validate";
+
+            // Create a JSON request content with the MD5 hash
+            // Should just be the md5Hash, no JSON object or ""
             StringContent content = new(md5Hash, Encoding.UTF8, "application/json");
+
             HttpResponseMessage response = await client.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
 

@@ -11,6 +11,7 @@ namespace InvestCloudServer
             // Step 1: Initialize the datasets A and B
             await Services.Services.InitializeDatasets(size);
 
+            // Start the stopwatch
             Stopwatch stopwatch = Stopwatch.StartNew();
             Console.WriteLine("Timer started");
 
@@ -18,13 +19,15 @@ namespace InvestCloudServer
             Task<int[,]> getMatrixATask = Services.Services.GetDataset("A", size);
             Task<int[,]> getMatrixBTask = Services.Services.GetDataset("B", size);
 
-            // Wait for both tasks to complete
+            // Wait for both tasks to complete in parallel
             await Task.WhenAll(getMatrixATask, getMatrixBTask);
 
             int[,] matrixA = getMatrixATask.Result;
             int[,] matrixB = getMatrixBTask.Result;
             Console.WriteLine("matrixA Length: " + matrixA.Length);
             Console.WriteLine("matrixB Length: " + matrixB.Length);
+
+            // Check if the matrices are square
             if (matrixA.Length != matrixB.Length)
                 throw new Exception("Matrix is not a square");
 
@@ -32,9 +35,13 @@ namespace InvestCloudServer
             int[,] resultMatrix = Utils.Utils.MultiplyMatrices(matrixA, matrixB);
             Console.WriteLine("resultMatrix Length: " + resultMatrix.Length);
 
+            if (resultMatrix.Length != (size * size))
+                throw new Exception("Matrix is not a square");
+
             // Step 4: Convert the result matrix to a concatenated string
             string resultString = Utils.Utils.MatrixToString(resultMatrix);
 
+            // End the stopwatch
             stopwatch.Stop();
             Console.WriteLine("Time Ended: " + stopwatch.Elapsed);
 
@@ -45,9 +52,10 @@ namespace InvestCloudServer
             // Step 6: Submit the MD5 hash for validation
             string validationResult = await Services.Services.ValidateResult(md5Hash);
 
+            // Check if validation succeeded and the elapsed time is less than 30 seconds
             if (
-                (validationResult != "Alas it didn't work") // Check if validation succeeded
-                && (stopwatch.Elapsed < TimeSpan.FromSeconds(30)) // Check if the elapsed time is less than 30 seconds
+                (validationResult != "Alas it didn't work")
+                && (stopwatch.Elapsed < TimeSpan.FromSeconds(30))
             )
             {
                 Console.WriteLine("Passphrase: " + md5Hash); // Success! Print the passphrase
