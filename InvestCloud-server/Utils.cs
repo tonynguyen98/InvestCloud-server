@@ -29,24 +29,14 @@ namespace InvestCloudServer.Utils
         }
 
         // Strassen's Matrix Multiplication algorithm = O(n^log2(7))
-        public static int[,] MultiplyMatrices(int[,] A, int[,] B)
+        public static int[,] MultiplyMatrices(int[,] A, int[,] B, int nativeThreshold = 128)
         {
             int n = A.GetLength(0);
             int[,] result = new int[n, n];
 
-            if (n <= 128)
+            if (n <= nativeThreshold)
             {
-                // Base case: Use traditional matrix multiplication
-                for (int i = 0; i < n; i++)
-                {
-                    for (int j = 0; j < n; j++)
-                    {
-                        for (int k = 0; k < n; k++)
-                        {
-                            result[i, j] += A[i, k] * B[k, j];
-                        }
-                    }
-                }
+                result = NativeMultiplyMatrices(A, B);
             }
             else
             {
@@ -150,29 +140,29 @@ namespace InvestCloudServer.Utils
         }
 
         // Native Matrix Multiplication algorithm = O(n^3))
-        // public static int[,] MultiplyMatrices(int[,] a, int[,] b)
-        // {
-        //     int size = a.GetLength(0);
-        //     int[,] result = new int[size, size];
+        public static int[,] NativeMultiplyMatrices(int[,] A, int[,] B)
+        {
+            int size = A.GetLength(0);
+            int[,] result = new int[size, size];
 
-        //     Parallel.For(
-        //         0,
-        //         size,
-        //         i =>
-        //         {
-        //             for (int j = 0; j < size; j++)
-        //             {
-        //                 int sum = 0;
-        //                 for (int k = 0; k < size; k++)
-        //                 {
-        //                     sum += a[i, k] * b[k, j];
-        //                 }
-        //                 result[i, j] = sum;
-        //             }
-        //         }
-        //     );
+            Parallel.For(
+                0,
+                size,
+                i =>
+                {
+                    for (int j = 0; j < size; j++)
+                    {
+                        int sum = 0;
+                        for (int k = 0; k < size; k++)
+                        {
+                            sum += A[i, k] * B[k, j];
+                        }
+                        result[i, j] = sum;
+                    }
+                }
+            );
 
-        //     return result;
-        // }
+            return result;
+        }
     }
 }

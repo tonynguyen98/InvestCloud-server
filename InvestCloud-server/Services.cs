@@ -64,7 +64,7 @@ namespace InvestCloudServer.Services
         public static async Task<string> ValidateResult(string md5Hash)
         {
             string url = "https://recruitment-test.investcloud.com/api/numbers/validate";
-            StringContent content = new($"\"{md5Hash}\"", Encoding.UTF8, "application/json");
+            StringContent content = new(md5Hash, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
 
