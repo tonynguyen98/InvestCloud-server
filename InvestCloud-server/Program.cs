@@ -15,12 +15,18 @@ namespace InvestCloudServer
             Stopwatch stopwatch = Stopwatch.StartNew();
             Console.WriteLine("Timer started");
 
+            Stopwatch getDataset = Stopwatch.StartNew();
+            Console.WriteLine("getDataset Timer started");
+
             // Step 2: Retrieve the datasets A and B
             Task<int[,]> getMatrixATask = Services.Services.GetDataset("A", size);
             Task<int[,]> getMatrixBTask = Services.Services.GetDataset("B", size);
 
             // Wait for both tasks to complete in parallel
             await Task.WhenAll(getMatrixATask, getMatrixBTask);
+
+            getDataset.Stop();
+            Console.WriteLine("getDatasetTime Ended: " + getDataset.Elapsed);
 
             int[,] matrixA = getMatrixATask.Result;
             int[,] matrixB = getMatrixBTask.Result;
@@ -31,12 +37,18 @@ namespace InvestCloudServer
             if (matrixA.Length != matrixB.Length)
                 throw new Exception("Matrix is not a square");
 
+            Stopwatch matrix = Stopwatch.StartNew();
+            Console.WriteLine("matrix Timer started");
+
             // Step 3: Multiply the matrices (A x B)
             int[,] resultMatrix = Utils.Utils.MultiplyMatrices(matrixA, matrixB);
             Console.WriteLine("resultMatrix Length: " + resultMatrix.Length);
 
             if (resultMatrix.Length != (size * size))
                 throw new Exception("Matrix is not a square");
+
+            matrix.Stop();
+            Console.WriteLine("getDatasetTime Ended: " + matrix.Elapsed);
 
             // Step 4: Convert the result matrix to a concatenated string
             string resultString = Utils.Utils.MatrixToString(resultMatrix);
